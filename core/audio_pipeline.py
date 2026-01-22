@@ -18,7 +18,7 @@ class AudioPipeline:
         self.temp_dir = tempfile.gettempdir()
 
     # =========================================================
-    # 🔧 UNIVERSAL AUDIO CONVERTER (m4a, webm, mp3 → wav)
+    # AUDIO CONVERTER (m4a, webm, mp3 → wav)
     # =========================================================
     def _convert_to_wav(self, input_path):
         """Convert any audio format to WAV using FFmpeg."""
@@ -59,7 +59,7 @@ class AudioPipeline:
         return wav_path
 
     # =========================================================
-    # 🎧 AUDIO LOADER
+    #  AUDIO LOADER
     # =========================================================
     def load_audio(self, audio_path):
         """Load audio file safely (YouTube/Windows/FFmpeg safe)."""
@@ -72,12 +72,11 @@ class AudioPipeline:
             if not os.path.exists(audio_path):
                 raise FileNotFoundError(audio_path)
 
-            # --- 1. COPY TO SAFE TEMP FILE ---
+            
             ext = Path(audio_path).suffix.lower()
             safe_input = os.path.join(tempfile.gettempdir(), f"audio_input{ext}")
             shutil.copy2(audio_path, safe_input)
 
-            # --- 2. CONVERT TO WAV USING SAFE FFmpeg FLAGS ---
             safe_wav = os.path.join(tempfile.gettempdir(), "audio_converted.wav")
 
             ffmpeg = shutil.which("ffmpeg")
@@ -102,19 +101,14 @@ class AudioPipeline:
 
             subprocess.run(cmd, capture_output=True, check=True)
 
-            # --- 3. LOAD WAV ---
             audio, sr = sf.read(safe_wav, dtype=np.float32)
-
-            # Resample if needed
             if sr != self.sample_rate:
                 from scipy.signal import resample
                 audio = resample(audio, int(len(audio) * self.sample_rate / sr))
-
-            # Mono
+                
             if audio.ndim > 1:
                 audio = audio.mean(axis=1)
 
-            # Normalize
             audio /= max(abs(audio).max(), 1e-6)
 
             return audio.astype(np.float32)
@@ -127,7 +121,7 @@ class AudioPipeline:
             raise
 
     # =========================================================
-    # ✂️ AUDIO CHUNKING
+    #  AUDIO CHUNKING
     # =========================================================
     def chunk_audio(self, audio, overlap=5):
         """Split audio into overlapping chunks."""
@@ -143,7 +137,7 @@ class AudioPipeline:
         return chunks
 
     # =========================================================
-    # 💾 SAVE CHUNKS
+    #  SAVE CHUNKS
     # =========================================================
     def save_chunk(self, chunk, index):
         chunk_path = os.path.join(self.temp_dir, f"chunk_{index}.wav")
@@ -151,7 +145,7 @@ class AudioPipeline:
         return chunk_path
 
     # =========================================================
-    # 🎤 SIMPLE VAD (Silence Removal)
+    #  SIMPLE VAD (Silence Removal)
     # =========================================================
     def apply_vad(self, audio, threshold=0.02):
         """Energy-based Voice Activity Detection."""
@@ -175,7 +169,7 @@ class AudioPipeline:
         return audio[full_mask]
 
     # =========================================================
-    # 🔄 NORMALIZATION
+    #  NORMALIZATION
     # =========================================================
     def normalize_audio(self, audio):
         max_val = np.abs(audio).max()
@@ -196,7 +190,7 @@ class AudioPipeline:
         return audio
 
     # =========================================================
-    # 🧠 PREPARE FOR TRANSCRIPTION
+    #  PREPARE FOR TRANSCRIPTION
     # =========================================================
     def get_audio_chunks_for_processing(self, audio_path, apply_vad=True):
         audio = self.process_audio_file(audio_path, apply_vad=apply_vad)
@@ -210,7 +204,7 @@ class AudioPipeline:
         return chunk_paths, audio
 
     # =========================================================
-    # 🧹 CLEANUP
+    #  CLEANUP
     # =========================================================
     def cleanup_chunks(self, chunk_paths):
         for path in chunk_paths:
