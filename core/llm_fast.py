@@ -26,7 +26,6 @@ class OllamaLLM:
 
         self._check_connection_and_model()
 
-    # -------------------------------------------------
     def _check_connection_and_model(self):
         """Check Ollama server + model availability."""
         try:
@@ -47,7 +46,6 @@ class OllamaLLM:
             logger.error(f"✗ Ollama not ready: {e}")
             self.available = False
 
-    # -------------------------------------------------
     def generate(self, prompt: str, temperature: float = 0.3, max_tokens: int = 500) -> str:
         """Generate text safely."""
         if not self.available:
@@ -76,8 +74,7 @@ class OllamaLLM:
         except Exception as e:
             logger.exception("Generation error")
             return f"[Generation error: {e}]"
-
-    # -------------------------------------------------
+            
     def stream_generate(self, prompt: str, temperature: float = 0.3):
         """Stream tokens from Ollama."""
         if not self.available or not prompt.strip():
@@ -124,7 +121,6 @@ Summary:
 """
         return self.generate(prompt, temperature=0.3, max_tokens=max_length)
 
-    # -------------------------------------------------
     def extract_key_points(self, text: str, num_points: int = 5) -> List[str]:
         if not text.strip():
             return ["[No text provided]"]
@@ -145,7 +141,6 @@ Extract {num_points} clear key points as bullet points:
 
         return points[:num_points]
 
-    # -------------------------------------------------
     def generate_questions(self, text: str, num_questions: int = 3) -> List[str]:
         if not text.strip():
             return ["[No text provided]"]
@@ -164,7 +159,6 @@ Generate {num_questions} exam questions:
             if len(q.strip()) > 10
         ][:num_questions]
 
-    # -------------------------------------------------
     def generate_mcq(self, text: str, num_questions: int = 3) -> List[dict]:
         if not text.strip():
             return []
